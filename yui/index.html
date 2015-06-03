@@ -1,0 +1,298 @@
+<script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>
+
+<script>
+    // Create a YUI sandbox on your page.
+    YUI().use('node', 'event', function (Y) {
+        // The Node and Event modules are loaded and ready to use.
+        // Your code goes here!
+
+        var oneElementById     = Y.one('#foo'),
+                oneElementByName   = Y.one('body'),
+                allElementsByClass = Y.all('.bar');
+
+        // Create DOM nodes.
+        var contentNode = Y.Node.create('<div>'),
+                listNode    = Y.Node.create('<ul>'),
+                footerNode  = Y.Node.create('<footer>');
+
+        contentNode.setHTML('<p>Node makes it easy to add content.</p>');
+        contentNode.insert('<button id="close-button"></button>');
+        listNode.insert('<li>Buy milk</li>');
+        footerNode.prepend('<h2>Footer Content</h2>');
+
+        // Manipulate DOM nodes.
+        Y.all('.important').addClass('highlight');
+
+//        Y.one('#close-button').on('click', function () {
+//            contentNode.hide();
+//        });
+    });
+
+    YUI().use("dataschema-json", function(Y) {
+        var data_in = {
+                    total:10,
+                    results:[
+                        {n:1, fname:"George", lname:"Washington"},
+                        {n:2, fname:"John", lname:"Adams"},
+                        {n:3, fname:"Thomas", lname:"Jefferson"},
+                        {n:4, fname:"James", lname:"Madison"},
+                        {n:5, fname:"James", lname:"Monroe"},
+                        {n:6, fname:"John", mname:"Quincy", lname:"Adams"},
+                        {n:7, fname:"Andrew", lname:"Jackson"},
+                        {n:8, fname:"Martin", lname:"Van Buren"},
+                        {n:9, fname:"William", mName:"Henry", lname:"Harrison"},
+                        {n:10, fname:"John", lname:"Tyler"}
+                    ]
+                },
+                schema = {
+                    metaFields: {total:"total"},
+                    resultListLocator: "results",
+                    // Or simply: ["n", "fname", "lname"]
+                    resultFields: [{key:"n"}, {key:"fname"}, {key:"lname"}]
+                },
+                data_out = Y.DataSchema.JSON.apply(schema, data_in);
+
+        console.log(data_out);
+    });
+</script>
+
+
+
+<script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>
+
+<style>
+    #mychart {
+        margin:10px 10px 10px 10px;
+        width:90%;
+        max-width: 800px;
+        height:400px;
+    }
+
+    #pieChart {
+        margin:10px 10px 10px 10px;
+        width:400px;
+        height:400px;
+    }
+
+</style>
+<body class="yui3-skin-sam">
+<div id="mychart"></div>
+<div id="pieChart"></div>
+<div id="pizza"></div>
+<script>
+    YUI().use('charts-legend', function (Y){
+        var myDataValues = [
+            {date:"1/1/2010", miscellaneous:2000, expenses:3700, revenue:2200},
+            {date:"2/1/2010", miscellaneous:50, expenses:9100, revenue:100},
+            {date:"3/1/2010", miscellaneous:400, expenses:1100, revenue:1500},
+            {date:"4/1/2010", miscellaneous:200, expenses:1900, revenue:2800},
+            {date:"5/1/2010", miscellaneous:500, expenses:7000, revenue:2650},
+            {date:"6/1/2010", miscellaneous:3000, expenses:4700, revenue:1200},
+            {date:"7/1/2010", miscellaneous:6550, expenses:6500, revenue:1100},
+            {date:"8/1/2010", miscellaneous:4005, expenses:2600, revenue:3500},
+            {date:"9/1/2010", miscellaneous:1200, expenses:8900, revenue:3800},
+            {date:"10/1/2010", miscellaneous:2000, expenses:1000, revenue:3650},
+            {date:"11/1/2010", miscellaneous:2000, expenses:3700, revenue:2200},
+            {date:"12/1/2010", miscellaneous:5000, expenses:3100, revenue:4100}
+        ];
+
+
+        var mychart = new Y.Chart({
+            legend: {
+                position: "right",
+                width: 300,
+                height: 300,
+                styles: {
+                    hAlign: "center",
+                    hSpacing: 4
+                }
+            },
+            dataProvider:myDataValues,
+            render:"#mychart",
+            styles: {
+                axes: {
+                    date: {
+                        label: {
+                            rotation: -45
+                        }
+                    }
+                }
+            },
+            categoryKey:"date",
+            categoryType:"time"
+        });
+
+
+        // Create data
+        var pieChartValues = [
+            {day:"Monday", taxes:2000},
+            {day:"Tuesday", taxes:50},
+            {day:"Wednesday", taxes:4000},
+            {day:"Thursday", taxes:200},
+            {day:"Friday", taxes:2000}
+        ];
+
+        var pieGraph = new Y.Chart({
+            render:"#pieChart",
+            categoryKey:"day",
+            seriesKeys:["taxes"],
+            dataProvider:pieChartValues,
+            type:"pie",
+            seriesCollection:[
+                {
+                    categoryKey:"day",
+                    valueKey:"taxes"
+                }
+            ]
+        });
+
+
+
+    });
+
+
+    YUI().use("datatable", "datasource-get", "datasource-jsonschema", "datatable-datasource", function (Y) {
+
+        var url = "http://query.yahooapis.com/v1/public/yql?format=json" +
+                        "&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys",
+                query = "&q=" + encodeURIComponent(
+                                'select * from local.search ' +
+                                'where zip = "94089" and query = "pizza"'),
+                dataSource,
+                table;
+
+        dataSource = new Y.DataSource.Get({ source: url });
+
+        dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
+            schema: {
+                resultListLocator: "query.results.Result",
+                resultFields: [
+                    "Title",
+                    "Phone",
+                    {
+                        key: "Rating",
+                        locator: "Rating.AverageRating",
+                        parser: function (val) {
+                            // YQL is returning "NaN" for unrated restaurants
+                            return isNaN(val) ? -1 : +val;
+                        }
+                    }
+                ]
+            }
+        });
+
+        table = new Y.DataTable({
+            columns: [
+                "Title",
+                "Phone",
+                {
+                    key: "Rating",
+                    formatter: function (o) {
+                        if (o.value === -1) {
+                            o.value = '(none)';
+                        }
+                    }
+                }
+            ],
+            summary: "Pizza places near 98089",
+            caption: "Table with JSON data from YQL"
+        });
+
+        table.plug(Y.Plugin.DataTableDataSource, { datasource: dataSource });
+
+        table.render("#pizza");
+
+        table.datasource.load({
+            request: query,
+
+            callback: {
+                success: function (e) {
+                    table.datasource.onDataReturnInitializeTable(e);
+                },
+                failure: function() {
+                    Y.one('#pizza').setHTML(
+                            'The data could not be retrieved. Please <a href="?mock=true">try this example with mocked data</a> instead.');
+                }
+            }
+        });
+    });
+
+</script>
+
+<!-- Add an additional blue button style -->
+<style>
+    .yui3-button {
+        margin:10px 0px 10px 0px;
+        color: #fff;
+        background-color: #3476b7;
+    }
+</style>
+
+<div id="demo" class="yui3-skin-sam yui3-g"> <!-- You need this skin class -->
+
+    <div id="leftcolumn" class="yui3-u">
+        <!-- Container for the calendar -->
+        <div id="mycalendar"></div>
+    </div>
+    <div id="rightcolumn" class="yui3-u">
+        <div id="links" style="padding-left:20px;">
+            <!-- The buttons are created simply by assigning the correct CSS class -->
+            <button id="togglePrevMonth" class="yui3-button">Toggle Previous Month's Dates</button><br>
+            <button id="toggleNextMonth" class="yui3-button">Toggle Next Month's Dates</button><br>
+            Selected date: <span id="selecteddate"></span>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    YUI().use('calendar', 'datatype-date', 'cssbutton',  function(Y) {
+
+        // Create a new instance of calendar, placing it in
+        // #mycalendar container, setting its width to 340px,
+        // the flags for showing previous and next month's
+        // dates in available empty cells to true, and setting
+        // the date to today's date.
+        var calendar = new Y.Calendar({
+            contentBox: "#mycalendar",
+            width:'340px',
+            showPrevMonth: true,
+            showNextMonth: true,
+            date: new Date()}).render();
+
+        // Get a reference to Y.DataType.Date
+        var dtdate = Y.DataType.Date;
+
+        // Listen to calendar's selectionChange event.
+        calendar.on("selectionChange", function (ev) {
+
+            // Get the date from the list of selected
+            // dates returned with the event (since only
+            // single selection is enabled by default,
+            // we expect there to be only one date)
+            var newDate = ev.newSelection[0];
+
+            // Format the date and output it to a DOM
+            // element.
+            Y.one("#selecteddate").setHTML(dtdate.format(newDate));
+        });
+
+
+        // When the 'Show Previous Month' link is clicked,
+        // modify the showPrevMonth property to show or hide
+        // previous month's dates
+        Y.one("#togglePrevMonth").on('click', function (ev) {
+            ev.preventDefault();
+            calendar.set('showPrevMonth', !(calendar.get("showPrevMonth")));
+        });
+
+        // When the 'Show Next Month' link is clicked,
+        // modify the showNextMonth property to show or hide
+        // next month's dates
+        Y.one("#toggleNextMonth").on('click', function (ev) {
+            ev.preventDefault();
+            calendar.set('showNextMonth', !(calendar.get("showNextMonth")));
+        });
+    });
+</script>
+
+</body>
