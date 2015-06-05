@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+<h1>Charting Types</h1>
+<ul id="menu">
+    <li id="simpleChart">Simple Chart</li>
+    <li id="lineChart">Line Chart</li>
+    <li id="stackedAreasChart">Stacked Areas Chart</li>
+    <li id="legendTooltipsMagnify">Monthly Sales with Legend, Tooltips, and Magnify</li>
+</ul>
+<div id="content" style="width: 550px; height: 550px; margin-left: 40px">
+</div>
+<div id="legend"></div>
+<!-- load dojo and p    rovide config via data attribute -->
+
+<script src="bower_components/dojo/dojo.js" data-dojo-config="isDebug: 1, async: 1, parseOnLoad: 1"></script>
+<link rel="stylesheet" href="style.css">
+<script>
+
+    require([
+                "dojo/dom",
+                "dojo/dom-class",
+                "dojo/dom-attr",
+                "dojo/hash",
+                "dojo/on",
+                "dojo/topic",
+                "dojo/router",
+                "dojo/request",
+                "dojo/json",
+                "dojox/charting/Chart",
+                'dojox/charting/plot2d/Pie',
+                "dojox/charting/themes/Claro",
+                "dojox/charting/themes/Tom",
+                "dojox/charting/themes/Dollar",
+                "dojox/charting/widget/Legend",
+                "dojox/charting/action2d/Tooltip",
+                "dojox/charting/action2d/Magnify",
+                "dojox/charting/plot2d/Lines",
+                "dojox/charting/plot2d/StackedAreas",
+                "dojo/query", // for dojo/on event delegation
+                "dojox/charting/plot2d/Markers",
+                "dojox/charting/axis2d/Default",
+                "dojo/domReady!"
+            ],
+            function (dom, domClass, domAttr, hash, on, topic, router, request, json, Chart, PiePlot, themeClaro, themeTom, themeDollar, Legend, Tooltip, Magnify, LinesPlot) {
+
+                renderSimpleChart();
+
+                router.register("/simple/chart", function (evt) {
+                    evt.preventDefault();
+                    renderSimpleChart();
+                });
+
+                router.register("/line/chart", function (evt) {
+                    evt.preventDefault();
+
+                    // When the DOM is ready and resources are loaded...
+
+                    // Define the data
+                    var chartData = [10000, 9200, 11811, 12000, 7662, 13887, 14200, 12222, 12000, 10009, 11288, 12099];
+
+                    dom.byId("content").innerHTML = '';
+
+                    // Create the chart within it&#x27;s "holding" node
+                    var chart = new Chart("content");
+
+                    // Set the theme
+                    chart.setTheme(themeTom);
+
+                    // Add the only/default plot
+                    chart.addPlot("default", {
+                        type: "Lines",
+                        markers: true
+                    });
+
+                    // Add axes
+                    chart.addAxis("x");
+                    chart.addAxis("y", {min: 5000, max: 15000, vertical: true, fixLower: "major", fixUpper: "major"});
+
+                    // Add the series of data
+                    chart.addSeries("SalesThisDecade", chartData);
+
+                    // Render the chart!
+
+                    chart.render();
+
+                });
+
+                router.register("stacked/areas/chart", function (evt) {
+                    evt.preventDefault();
+
+                    // Define the data
+                    var chartData = [10000, 9200, 11811, 12000, 7662, 13887, 14200, 12222, 12000, 10009, 11288, 12099];
+                    var chartData2 = [3000, 12000, 17733, 9876, 12783, 12899, 13888, 13277, 14299, 12345, 12345, 15763];
+
+                    // Create the chart within it&#x27;s "holding" node
+
+
+                    dom.byId("content").innerHTML = '';
+                    var chart = new Chart("content");
+
+                    // Set the theme
+                    chart.setTheme(themeDollar);
+
+                    // Add the only/default plot
+                    chart.addPlot("default", {
+                        type: "StackedAreas",
+                        markers: true
+                    });
+
+                    // Add axes
+                    chart.addAxis("x");
+                    chart.addAxis("y", {min: 5000, max: 30000, vertical: true, fixLower: "major", fixUpper: "major"});
+
+                    // Add the series of data
+                    chart.addSeries("Monthly Sales - 2010", chartData);
+                    chart.addSeries("Monthly Sales - 2009", chartData2);
+
+                    // Render the chart!
+                    chart.render();
+
+
+                });
+
+
+                router.register("legend/tooltips/magnify", function (evt) {
+                    evt.preventDefault();
+                    dom.byId("content").innerHTML = '';
+                    // Define the data
+                    var chartData = [10000, 9200, 11811, 12000, 7662, 13887, 14200, 12222, 12000, 10009, 11288, 12099];
+                    var chartData2 = [3000, 12000, 17733, 9876, 12783, 12899, 13888, 13277, 14299, 12345, 12345, 15763];
+                    var chartData3 = [3000, 12000, 17733, 9876, 12783, 12899, 13888, 13277, 14299, 12345, 12345, 15763].reverse();
+
+                    // Create the chart within it&#x27;s "holding" node
+                    var chart = new Chart("content");
+
+                    // Set the theme
+                    chart.setTheme(themeClaro);
+
+                    // Add the only/default plot
+                    chart.addPlot("default", {
+                        type: LinesPlot,
+                        markers: true
+                    });
+
+                    // Add axes
+                    chart.addAxis("x");
+                    chart.addAxis("y", {min: 5000, max: 30000, vertical: true, fixLower: "major", fixUpper: "major"});
+
+                    // Add the series of data
+                    chart.addSeries("Monthly Sales - 2010", chartData);
+                    chart.addSeries("Monthly Sales - 2009", chartData2);
+                    chart.addSeries("Monthly Sales - 2008", chartData3);
+
+                    // Create the tooltip
+                    var tip = new Tooltip(chart, "default");
+
+                    // Create the magnifier
+                    var mag = new Magnify(chart, "default");
+
+                    // Render the chart!
+                    chart.render();
+
+                    // Create the legend
+                    var legend = new Legend({chart: chart}, "legend");
+                });
+
+                router.startup();
+                on(dom.byId("simpleChart"), "click", function () {
+                    activateChart('simpleChart');
+                    router.go("/simple/chart");
+                });
+
+                on(dom.byId("lineChart"), "click", function () {
+                    activateChart('lineChart');
+                    router.go("/line/chart");
+                });
+
+                on(dom.byId("stackedAreasChart"), "click", function () {
+                    activateChart('stackedAreasChart');
+                    router.go("stacked/areas/chart");
+                });
+
+                on(dom.byId("legendTooltipsMagnify"), "click", function () {
+                    activateChart('legendTooltipsMagnify');
+                    router.go("legend/tooltips/magnify");
+                });
+                
+                function renderSimpleChart(){
+
+                    var chartData = [
+                        {x: 1, y: 19021},
+                        {x: 1, y: 12837},
+                        {x: 1, y: 12378},
+                        {x: 1, y: 21882},
+                        {x: 1, y: 17654},
+                        {x: 1, y: 15833},
+                        {x: 1, y: 16122}
+                    ];
+
+                    // Create the chart within it&#x27;s "holding" node
+                    dom.byId("content").innerHTML = '';
+
+                    var pieChart = new Chart("content");
+
+                    // Set the theme
+                    pieChart.setTheme(themeClaro);
+
+                    // Add the only/default plot
+                    pieChart.addPlot("default", {
+                        type: PiePlot, // our plot2d/Pie module reference as type value
+                        radius: 200,
+                        fontColor: "black",
+                        labelOffset: -20
+                    });
+
+                    // Add the series of data
+                    pieChart.addSeries("January", chartData);
+
+                    // Render the chart!
+
+                    pieChart.render();
+                    activateChart('simpleChart');
+
+                }
+
+                function activateChart(chart){
+
+                    var charts = ['simpleChart', 'lineChart', 'stackedAreasChart', 'legendTooltipsMagnify'];
+
+                    charts.forEach(function(entry){
+
+                        if(entry == chart){
+                            domClass.add(dom.byId(entry), "activeChart");
+                        } else {
+                            domClass.remove(dom.byId(entry), "activeChart");
+
+                        }
+                    });
+                }
+            });
+</script>
+</body>
+</html>
