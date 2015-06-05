@@ -1,33 +1,6 @@
 <script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>
 
 <script>
-    // Create a YUI sandbox on your page.
-    YUI().use('node', 'event', function (Y) {
-        // The Node and Event modules are loaded and ready to use.
-        // Your code goes here!
-
-        var oneElementById     = Y.one('#foo'),
-                oneElementByName   = Y.one('body'),
-                allElementsByClass = Y.all('.bar');
-
-        // Create DOM nodes.
-        var contentNode = Y.Node.create('<div>'),
-                listNode    = Y.Node.create('<ul>'),
-                footerNode  = Y.Node.create('<footer>');
-
-        contentNode.setHTML('<p>Node makes it easy to add content.</p>');
-        contentNode.insert('<button id="close-button"></button>');
-        listNode.insert('<li>Buy milk</li>');
-        footerNode.prepend('<h2>Footer Content</h2>');
-
-        // Manipulate DOM nodes.
-        Y.all('.important').addClass('highlight');
-
-//        Y.one('#close-button').on('click', function () {
-//            contentNode.hide();
-//        });
-    });
-
     YUI().use("dataschema-json", function(Y) {
         var data_in = {
                     total:10,
@@ -58,8 +31,6 @@
 
 
 
-<script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>
-
 <style>
     #mychart {
         margin:10px 10px 10px 10px;
@@ -78,7 +49,6 @@
 <body class="yui3-skin-sam">
 <div id="mychart"></div>
 <div id="pieChart"></div>
-<div id="pizza"></div>
 <script>
     YUI().use('charts-legend', function (Y){
         var myDataValues = [
@@ -148,73 +118,6 @@
 
 
 
-    });
-
-
-    YUI().use("datatable", "datasource-get", "datasource-jsonschema", "datatable-datasource", function (Y) {
-
-        var url = "http://query.yahooapis.com/v1/public/yql?format=json" +
-                        "&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys",
-                query = "&q=" + encodeURIComponent(
-                                'select * from local.search ' +
-                                'where zip = "94089" and query = "pizza"'),
-                dataSource,
-                table;
-
-        dataSource = new Y.DataSource.Get({ source: url });
-
-        dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
-            schema: {
-                resultListLocator: "query.results.Result",
-                resultFields: [
-                    "Title",
-                    "Phone",
-                    {
-                        key: "Rating",
-                        locator: "Rating.AverageRating",
-                        parser: function (val) {
-                            // YQL is returning "NaN" for unrated restaurants
-                            return isNaN(val) ? -1 : +val;
-                        }
-                    }
-                ]
-            }
-        });
-
-        table = new Y.DataTable({
-            columns: [
-                "Title",
-                "Phone",
-                {
-                    key: "Rating",
-                    formatter: function (o) {
-                        if (o.value === -1) {
-                            o.value = '(none)';
-                        }
-                    }
-                }
-            ],
-            summary: "Pizza places near 98089",
-            caption: "Table with JSON data from YQL"
-        });
-
-        table.plug(Y.Plugin.DataTableDataSource, { datasource: dataSource });
-
-        table.render("#pizza");
-
-        table.datasource.load({
-            request: query,
-
-            callback: {
-                success: function (e) {
-                    table.datasource.onDataReturnInitializeTable(e);
-                },
-                failure: function() {
-                    Y.one('#pizza').setHTML(
-                            'The data could not be retrieved. Please <a href="?mock=true">try this example with mocked data</a> instead.');
-                }
-            }
-        });
     });
 
 </script>
